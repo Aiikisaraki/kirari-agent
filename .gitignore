@@ -1,0 +1,6 @@
+node_modules/
+*.tsbuildinfo
+.DS_Store
+
+# dist/ 故意入库：两端通过 file: 软链依赖本包，npm 不保证对软链跑 prepare，
+# 提交构建产物可保证任何人 clone 后立刻 require 得到；将来切 github: 依赖时 prepare 会覆盖它。

@@ -1,0 +1,27 @@
+{
+    "name": "kirari-agent",
+    "version": "0.1.0",
+    "description": "Kirari 内核共享层：事件流真源 + 投影 + 上下文注入。核心版与桌面版共用同一份实现。",
+    "license": "MIT",
+    "author": "Aki",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "src",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "prepare": "npm run build",
+        "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^24.12.3",
+        "typescript": "~6.0.2",
+        "vitest": "^5.0.3"
+    }
+}

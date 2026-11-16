@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "lib": ["ES2022"],
+
+        // 产出 CommonJS：核心版是纯 CJS、直接 require；桌面端由 vite 打包，
+        // 消费 CJS 产物没有问题。单一产物比双产物好维护。
+        //
+        // 关于 module/moduleResolution 的选型：
+        //   桌面端用的是 esnext + bundler，那是**给打包器吃**的配置（不产出），
+        //   本包要真正 emit 出 JS，必须用与 emit 兼容的解析模式。
+        //   TypeScript 6 起 node10（旧名 "Node"）已废弃，故选 nodenext；
+        //   package.json 没有 "type" 字段 → 本包按 CommonJS 处理，产出 require()。
+        //
+        // 本包连 better-sqlite3 / ws / electron / openai 都不依赖，只产出纯函数
+        // 与字符串常量：数据库由两端各自持有并注入 EventStore 适配器，
+        // 避免原生模块在 Electron 主进程里需要单独 rebuild 的坑。
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+
+        "outDir": "dist",
+        "rootDir": "src",
+        "declaration": true,
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "strict": true,
+
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "types": ["node"]
+    },
+    "include": ["src/**/*.ts"],
+    // 测试不进产物；类型检查走 tsconfig.test.json（那份会收进来）。
+    "exclude": ["src/**/*.spec.ts"]
+}
