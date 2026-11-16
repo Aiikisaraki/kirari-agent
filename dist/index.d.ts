@@ -6,3 +6,5 @@ export * from "./projector";
 export * from "./recorder";
 export * from "./profile";
 export * from "./runner";
+export * from "./tasks";
+export * from "./jobs";

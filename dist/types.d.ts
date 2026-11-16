@@ -1,7 +1,7 @@
 /** 产生事件的进程。两端各自写同一个 pet_sessions.db，靠 origin 区分来源。 */
 export type EventOrigin = "core" | "desktop";
 /** 事件类型穷举。新增类型只能追加，不要插入中间改变已有顺序语义。 */
-export type EventType = "turn_start" | "turn_end" | "session_cleared" | "messages_merged" | "session_baseline" | "messages_pruned" | "user_message" | "assistant_message" | "external_message" | "context_inject" | "context" | "request" | "assistant_delta" | "assistant_attempt" | "tool_call" | "tool_result" | "context_compact" | "task_created" | "task_updated" | "task_completed" | "goal_set";
+export type EventType = "turn_start" | "turn_end" | "session_cleared" | "messages_merged" | "session_baseline" | "messages_pruned" | "user_message" | "assistant_message" | "external_message" | "context_inject" | "context" | "request" | "assistant_delta" | "assistant_attempt" | "tool_call" | "tool_result" | "context_compact" | "task_created" | "task_updated" | "task_completed" | "task_failed" | "goal_set" | "job_created" | "job_fired" | "job_cancelled";
 export declare const EVENT_TYPES: readonly EventType[];
 /** 上下文注入来源。顺序即 order，Trajectory 按它追溯每条注入。 */
 export type InjectSource = "system.base" | "daily_brief" | "knowledge" | "skills";

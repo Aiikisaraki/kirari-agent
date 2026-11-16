@@ -4,6 +4,12 @@ import {
     SESSION_EVENTS_COLUMNS,
     SESSION_EVENTS_DDL,
     SESSION_EVENTS_TABLE,
+    TASKS_DDL,
+    TASKS_TABLE,
+    TASKS_COLUMNS,
+    SCHEDULED_JOBS_DDL,
+    SCHEDULED_JOBS_TABLE,
+    SCHEDULED_JOBS_COLUMNS,
 } from "./schema";
 import { DEFAULT_EVENT_QUERY_LIMIT, MAX_EVENT_QUERY_LIMIT } from "./store";
 import { EVENT_TYPES, INJECT_SOURCES } from "./types";
@@ -42,6 +48,13 @@ describe("事件 schema", () => {
             "tool_result",
             "session_cleared",
             "messages_merged",
+            "task_created",
+            "task_updated",
+            "task_completed",
+            "task_failed",
+            "job_created",
+            "job_fired",
+            "job_cancelled",
         ] as const) {
             expect(EVENT_TYPES).toContain(t);
         }
@@ -59,5 +72,27 @@ describe("事件 schema", () => {
     it("查询上限合理", () => {
         expect(DEFAULT_EVENT_QUERY_LIMIT).toBeLessThanOrEqual(MAX_EVENT_QUERY_LIMIT);
         expect(MAX_EVENT_QUERY_LIMIT).toBe(2000);
+    });
+});
+
+describe("阶段 C 业务表 DDL", () => {
+    it("tasks 表主键 + 索引 + 列清单一致", () => {
+        expect(TASKS_DDL).toContain(`CREATE TABLE IF NOT EXISTS ${TASKS_TABLE}`);
+        expect(TASKS_DDL).toContain("task_id       TEXT PRIMARY KEY");
+        expect(TASKS_DDL).toContain("idx_tasks_session_status");
+        expect(TASKS_DDL).toContain("idx_tasks_active");
+        for (const col of TASKS_COLUMNS) expect(TASKS_DDL).toContain(`${col.name} `);
+        const names = TASKS_COLUMNS.map((c) => c.name);
+        expect(new Set(names).size).toBe(names.length);
+    });
+
+    it("scheduled_jobs 表主键 + 到期索引 + 列清单一致", () => {
+        expect(SCHEDULED_JOBS_DDL).toContain(`CREATE TABLE IF NOT EXISTS ${SCHEDULED_JOBS_TABLE}`);
+        expect(SCHEDULED_JOBS_DDL).toContain("job_id        TEXT PRIMARY KEY");
+        expect(SCHEDULED_JOBS_DDL).toContain("idx_jobs_due");
+        expect(SCHEDULED_JOBS_DDL).toContain("idx_jobs_session");
+        for (const col of SCHEDULED_JOBS_COLUMNS) expect(SCHEDULED_JOBS_DDL).toContain(`${col.name} `);
+        const names = SCHEDULED_JOBS_COLUMNS.map((c) => c.name);
+        expect(new Set(names).size).toBe(names.length);
     });
 });

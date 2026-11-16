@@ -11,3 +11,9 @@ export interface EventColumn {
  * 这个清单的真正用途是**未来新增列**：只改包里这一处，两端自动跟上，不用各写一份。
  */
 export declare const SESSION_EVENTS_COLUMNS: readonly EventColumn[];
+export declare const TASKS_TABLE = "tasks";
+export declare const TASKS_DDL = "\nCREATE TABLE IF NOT EXISTS tasks (\n    task_id       TEXT PRIMARY KEY,\n    session_id    TEXT NOT NULL,\n    turn_id       TEXT NOT NULL,\n    origin        TEXT NOT NULL,\n    uid           INTEGER NOT NULL DEFAULT 1,\n    title         TEXT NOT NULL,\n    status        TEXT NOT NULL,\n    steps_json    TEXT NOT NULL,\n    current_step  INTEGER NOT NULL DEFAULT 0,\n    created_at    INTEGER NOT NULL,\n    updated_at    INTEGER NOT NULL,\n    completed_at  INTEGER\n);\nCREATE INDEX IF NOT EXISTS idx_tasks_session_status ON tasks(session_id, status);\nCREATE INDEX IF NOT EXISTS idx_tasks_active ON tasks(status, created_at);\n";
+export declare const TASKS_COLUMNS: readonly EventColumn[];
+export declare const SCHEDULED_JOBS_TABLE = "scheduled_jobs";
+export declare const SCHEDULED_JOBS_DDL = "\nCREATE TABLE IF NOT EXISTS scheduled_jobs (\n    job_id        TEXT PRIMARY KEY,\n    session_id    TEXT NOT NULL,\n    origin        TEXT NOT NULL,\n    uid           INTEGER NOT NULL DEFAULT 1,\n    kind          TEXT NOT NULL,\n    title         TEXT NOT NULL,\n    payload       TEXT NOT NULL,\n    due_at        INTEGER NOT NULL,\n    recurrence    TEXT NOT NULL DEFAULT 'once',\n    status        TEXT NOT NULL DEFAULT 'pending',\n    created_at    INTEGER NOT NULL,\n    updated_at    INTEGER NOT NULL,\n    last_fired_at INTEGER\n);\nCREATE INDEX IF NOT EXISTS idx_jobs_due ON scheduled_jobs(status, due_at);\nCREATE INDEX IF NOT EXISTS idx_jobs_session ON scheduled_jobs(session_id, status);\n";
+export declare const SCHEDULED_JOBS_COLUMNS: readonly EventColumn[];

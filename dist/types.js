@@ -31,7 +31,11 @@ exports.EVENT_TYPES = [
     "task_created",
     "task_updated",
     "task_completed",
+    "task_failed",
     "goal_set",
+    "job_created",
+    "job_fired",
+    "job_cancelled",
 ];
 exports.INJECT_SOURCES = [
     "system.base",

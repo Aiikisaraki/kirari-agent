@@ -7,7 +7,8 @@
 // ⚠️ 本层不得 import electron / better-sqlite3 / ws / openai。
 //    数据库由两端各自持有，通过 EventStore 接口注入；本包只做纯逻辑。
 //
-// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder → profile/runner。
+// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder → profile/runner → tasks/jobs。
+// 阶段 C：tasks / jobs 只导出类型 + 纯逻辑 + Store 契约，DB 仍由两端注入。
 
 export * from "./types";
 export * from "./schema";
@@ -17,3 +18,5 @@ export * from "./projector";
 export * from "./recorder";
 export * from "./profile";
 export * from "./runner";
+export * from "./tasks";
+export * from "./jobs";

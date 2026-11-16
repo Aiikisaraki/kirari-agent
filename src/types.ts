@@ -33,7 +33,11 @@ export type EventType =
     | "task_created"
     | "task_updated"
     | "task_completed"
-    | "goal_set";
+    | "task_failed"
+    | "goal_set"
+    | "job_created"
+    | "job_fired"
+    | "job_cancelled";
 
 export const EVENT_TYPES: readonly EventType[] = [
     "turn_start",
@@ -56,7 +60,11 @@ export const EVENT_TYPES: readonly EventType[] = [
     "task_created",
     "task_updated",
     "task_completed",
+    "task_failed",
     "goal_set",
+    "job_created",
+    "job_fired",
+    "job_cancelled",
 ] as const;
 
 /** 上下文注入来源。顺序即 order，Trajectory 按它追溯每条注入。 */

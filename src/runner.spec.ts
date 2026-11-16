@@ -93,21 +93,50 @@ describe("AgentRunner 停止条件语义化（hasDebt 决定继续，maxRounds �
         ).rejects.toBe(boom);
     });
 
-    it("阶段 C 挂接点：外部任务 note 到账本可让 turn 保持打开", async () => {
+    // ── 阶段 C：continue 让未完成任务保持 turn 打开 ──
+    it("continue 逐轮推进任务，最后一轮收尾", async () => {
         const runner = new AgentRunner<FakeReply>(profile);
-        await runner.run(async (round, r) => {
-            if (round === 0) {
-                r.note(["task-scheduled"]); // 外部任务欠账
-                expect(r.hasDebt()).toBe(true);
-                expect(r.pendingCount).toBe(1);
-                r.settle("task-scheduled"); // 任务完成
-                const id = "tc-0";
-                r.note([id]);
-                r.settle(id);
-                return { kind: "tools", toolCallIds: [id] };
-            }
-            return { kind: "final", value: { text: "ok" } };
+        const rounds: number[] = [];
+        const result = await runner.run(async (round) => {
+            rounds.push(round);
+            if (round < 2) return { kind: "continue", reason: "还有任务步骤" };
+            return { kind: "final", value: { text: "任务全部完成" } };
         });
+        expect(result.text).toBe("任务全部完成");
+        expect(rounds).toEqual([0, 1, 2]);
         expect(runner.hasDebt()).toBe(false);
+    });
+
+    it("continue 与 tools 混合：先推进任务再调工具", async () => {
+        const runner = new AgentRunner<FakeReply>(profile);
+        const seq: string[] = [];
+        const result = await runner.run(async (round, r) => {
+            if (round === 0) {
+                seq.push("continue");
+                return { kind: "continue", reason: "任务待执行" };
+            }
+            if (round === 1) {
+                seq.push("tools");
+                r.note(["tc"]);
+                r.settle("tc");
+                return { kind: "tools", toolCallIds: ["tc"] };
+            }
+            seq.push("final");
+            return { kind: "final", value: { text: "done" } };
+        });
+        expect(result.text).toBe("done");
+        expect(seq).toEqual(["continue", "tools", "final"]);
+    });
+
+    it("任务一路 continue 到熔断上限 → 抛逐字一致的熔断错误", async () => {
+        const runner = new AgentRunner<FakeReply>(profile);
+        let stepCount = 0;
+        await expect(
+            runner.run(async () => {
+                stepCount++;
+                return { kind: "continue", reason: "任务一直没完成" };
+            }),
+        ).rejects.toThrow("工具调用轮次过多，未能生成最终回复");
+        expect(stepCount).toBe(profile.maxRounds);
     });
 });

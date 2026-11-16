@@ -6,6 +6,9 @@ export type AgentStepResult<T> = {
 } | {
     kind: "tools";
     toolCallIds: string[];
+} | {
+    kind: "continue";
+    reason: string;
 };
 /**
  * 工具循环驱动器。
@@ -15,8 +18,8 @@ export type AgentStepResult<T> = {
  *   - settle(id)  该 tool_call 的结果已回灌到 messages
  *   - hasDebt()   账本非空 = turn 仍欠工作，不能关闭
  *
- * 本阶段（B）两端在每轮工具执行后 note→settle，因此轮次边界上账本为空；
- * 账本真正被外部写入是阶段 C（task_* 事件消费者）。
+ * 两端在每轮工具执行后 note→settle，因此轮次边界上账本为空。阶段 C 的
+ * 任务欠账走独立的 continue 信号（宿主查 TaskStore），不进这个账本。
  */
 export declare class AgentRunner<T> {
     readonly profile: AgentProfile;

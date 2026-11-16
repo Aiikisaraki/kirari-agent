@@ -4,19 +4,23 @@
 // 停止条件语义化（用户拍板）：一个 turn 在「不再欠下任何工作」时关闭。
 //   - 模型返回纯文本        → 无欠账 → turn 关闭 → 返回最终结果
 //   - 模型返回 tool_calls   → 产生欠账（结果必须回灌）→ 回灌后进入下一轮
-//   - 欠账连续产生到上限    → maxRounds 熔断（安全上限，不再当「目标轮数」）
+//   - 宿主返回 continue     → 仍有未完成任务 → 保持 turn 打开再推进一轮（阶段 C）
+//   - 连续到上限            → maxRounds 熔断（安全上限，不再当「目标轮数」）
 //
 // 为什么 IO 走回调：包只放纯逻辑（用户拍板），模型调用 / 工具执行 / 事件记录
-// 全由两端在 step 回调里做；runner 只决定「下一轮还是收尾」并维护账本。
-// 这也是阶段 C 的挂接点：外部任务（goal_set/task_*）可 note 到账本，
-// 让 turn 为「主动做事」保持打开，而不改两端主链路。
+// 全由两端在 step 回调里做；runner 只决定「下一轮还是收尾」并维护工具账本。
+// 阶段 C 的任务欠账刻意不进这个账本：宿主在 step 回调里查 TaskStore 决定是否
+// 返回 continue，runner 保持对「任务」无感知，只做机械驱动 + 熔断。
 
 import type { AgentProfile } from "./profile";
 
 /** 一轮的结果：有最终文本（无欠账）或本轮领取的工具调用（有欠账，已回灌）。 */
 export type AgentStepResult<T> =
     | { kind: "final"; value: T }
-    | { kind: "tools"; toolCallIds: string[] };
+    | { kind: "tools"; toolCallIds: string[] }
+    // 阶段 C：本轮无工具调用、也不返回最终文本，但仍有未完成任务需要推进。
+    // 账本里 note 着未完成的 task step id，runner 据此保持 turn 打开进入下一轮。
+    | { kind: "continue"; reason: string };
 
 /**
  * 工具循环驱动器。
@@ -26,8 +30,8 @@ export type AgentStepResult<T> =
  *   - settle(id)  该 tool_call 的结果已回灌到 messages
  *   - hasDebt()   账本非空 = turn 仍欠工作，不能关闭
  *
- * 本阶段（B）两端在每轮工具执行后 note→settle，因此轮次边界上账本为空；
- * 账本真正被外部写入是阶段 C（task_* 事件消费者）。
+ * 两端在每轮工具执行后 note→settle，因此轮次边界上账本为空。阶段 C 的
+ * 任务欠账走独立的 continue 信号（宿主查 TaskStore），不进这个账本。
  */
 export class AgentRunner<T> {
     readonly profile: AgentProfile;
@@ -91,6 +95,14 @@ export class AgentRunner<T> {
                     );
                 }
                 return result.value;
+            }
+
+            // continue 轮（阶段 C）：本轮模型没产出工具调用，但宿主查 TaskStore
+            // 发现仍有未完成任务，请求再来一轮推进。任务欠账刻意**不进工具账本**
+            // （否则会污染 tools/final 的结算校验），合法性由宿主 step 回调保证，
+            // runner 只做机械驱动；无限空转由 maxRounds 熔断兜底。
+            if (result.kind === "continue") {
+                continue;
             }
 
             // tools 轮：欠账必须在本轮内清偿完毕才能进下一轮，否则拒绝空转。
