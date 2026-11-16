@@ -8,7 +8,7 @@
 // ⚠️ 本层不得 import electron / better-sqlite3 / ws / openai。
 //    数据库由两端各自持有，通过 EventStore 接口注入；本包只做纯逻辑。
 //
-// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder。
+// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder → profile/runner。
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -30,4 +30,6 @@ __exportStar(require("./store"), exports);
 __exportStar(require("./inject"), exports);
 __exportStar(require("./projector"), exports);
 __exportStar(require("./recorder"), exports);
+__exportStar(require("./profile"), exports);
+__exportStar(require("./runner"), exports);
 //# sourceMappingURL=index.js.map
