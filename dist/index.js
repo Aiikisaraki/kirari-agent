@@ -8,8 +8,10 @@
 // ⚠️ 本层不得 import electron / better-sqlite3 / ws / openai。
 //    数据库由两端各自持有，通过 EventStore 接口注入；本包只做纯逻辑。
 //
-// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder → profile/runner → tasks/jobs。
+// 导出顺序即依赖方向：types → schema/store → inject → projector → recorder → profile/runner → tasks/jobs → capability/skill。
 // 阶段 C：tasks / jobs 只导出类型 + 纯逻辑 + Store 契约，DB 仍由两端注入。
+// 阶段 D：capability（统一注册表 + scope 隔离 + 超时/截断策略）与 skill（SKILL.md 解析）
+//         仍是纯逻辑；dispatch 执行器与文件扫描由两端各自持有，本包不碰 IO。
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,4 +37,6 @@ __exportStar(require("./profile"), exports);
 __exportStar(require("./runner"), exports);
 __exportStar(require("./tasks"), exports);
 __exportStar(require("./jobs"), exports);
+__exportStar(require("./capability"), exports);
+__exportStar(require("./skill"), exports);
 //# sourceMappingURL=index.js.map

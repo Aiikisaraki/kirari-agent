@@ -36,6 +36,7 @@ exports.EVENT_TYPES = [
     "job_created",
     "job_fired",
     "job_cancelled",
+    "skill_loaded",
 ];
 exports.INJECT_SOURCES = [
     "system.base",

@@ -55,6 +55,7 @@ describe("事件 schema", () => {
             "job_created",
             "job_fired",
             "job_cancelled",
+            "skill_loaded",
         ] as const) {
             expect(EVENT_TYPES).toContain(t);
         }

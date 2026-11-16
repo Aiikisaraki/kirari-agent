@@ -1,7 +1,7 @@
 {
     "name": "kirari-agent",
-    "version": "0.3.0",
-    "description": "Kirari 内核共享层：事件流真源 + 投影 + 上下文注入 + 可配置 Runner + 任务与定时任务纯逻辑。核心版与桌面版共用同一份实现。",
+    "version": "0.4.0",
+    "description": "Kirari 内核共享层：事件流真源 + 投影 + 上下文注入 + 可配置 Runner + 任务与定时任务 + 统一能力注册表与 SKILL.md 纯逻辑。核心版与桌面版共用同一份实现。",
     "license": "MIT",
     "author": "Aki",
     "main": "dist/index.js",
