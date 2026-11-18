@@ -3,7 +3,7 @@ export interface SkillMeta {
     name: string;
     description: string;
     /** 可选：版本、标签、作者等扩展字段，原样保留供 UI 展示。 */
-    [key: string]: string | string[];
+    [key: string]: string | string[] | Record<string, unknown>;
 }
 /** 一个解析好的 SKILL.md。 */
 export interface ParsedSkill {
@@ -12,26 +12,35 @@ export interface ParsedSkill {
     body: string;
 }
 export declare const MAX_SKILL_NAME = 64;
-export declare const MAX_SKILL_DESCRIPTION = 200;
-export declare const MAX_SKILL_BODY = 20000;
+export declare const MAX_SKILL_DESCRIPTION = 2000;
+export declare const MAX_SKILL_BODY = 200000;
 export declare const MAX_SKILL_TAGS = 20;
+export interface FrontmatterParseResult {
+    /** 顶层标量字段（name / description / version ...）。嵌套与列表是 JSON 串。 */
+    meta: Record<string, string | string[] | Record<string, unknown>>;
+    /** 正文（frontmatter 之后）。 */
+    body: string;
+}
 /**
- * 解析一段 SKILL.md 文本。格式：
- *   ---
- *   name: xxx
- *   description: yyy
- *   tags: a, b
- *   ---
- *   # 正文...
- *
- * 严格规则：必须以 --- 开头（允许前置 BOM/空白），必须有闭合 ---；
- * name/description 必填且非空；未知字段作为字符串保留；越界一律抛错。
+ * 解析 SKILL.md 文本，返回元数据与正文。
+ * 严格的错误信息全部带 where 前缀，便于定位是哪个文件坏了。
  */
-export declare function parseSkillMarkdown(raw: string, where?: string): ParsedSkill;
+export declare function parseFrontmatter(raw: string, where?: string): FrontmatterParseResult;
+/**
+ * 解析一段 SKILL.md 文本。格式：YAML frontmatter + Markdown 正文。
+ *
+ * 必备：name、description 非空且不超上限。其余字段原样保留。
+ *
+ * @param fallbackName 可选的兜底名字（通常传技能所在目录名）。
+ *   Claude Code 等实现对「frontmatter 只写了 description、没写 name」的技能
+ *   是允许的（用目录名当名字）。传了 fallbackName 就能兼容这类文件；
+ *   不传则维持严格语义（name 必填）。
+ */
+export declare function parseSkillMarkdown(raw: string, where?: string, fallbackName?: string): ParsedSkill;
 /** 目录摘要的一行：进 system 的只有这一行，不含正文。 */
-export declare function skillCatalogLine(parsed: ParsedSkill): string;
+export declare function skillCatalogLine(parsed: ParsedSkill, maxDescription?: number): string;
 /** 把多个 SKILL.md 解析结果生成目录块（仍不含正文）。 */
-export declare function buildSkillCatalog(skills: readonly ParsedSkill[]): string;
+export declare function buildSkillCatalog(skills: readonly ParsedSkill[], maxDescription?: number): string;
 /**
  * 把已按需加载的技能正文拼成注入块。只在模型调用 load_skill 后调用，
  * 未命中的技能正文绝不进入这里——这就是「渐进披露」的关键。
