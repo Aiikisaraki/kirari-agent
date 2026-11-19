@@ -1,6 +1,6 @@
 # kirari-agent
 
-Kirari 内核共享层。核心版（`pet-api`，CommonJS）与桌面版（`akisaki-kirari`，Electron 主进程）**共用同一份实现**，避免两份复制内核各自演进。
+Kirari 内核共享层。核心版（`kirari-core`，CommonJS）与桌面版（`kirari-desktop`，Electron 主进程）**共用同一份实现**，避免两份复制内核各自演进。
 
 ## 这一层负责什么
 
@@ -17,6 +17,11 @@ Kirari 内核共享层。核心版（`pet-api`，CommonJS）与桌面版（`akis
 
 ## 使用
 
-两端以 `"kirari-agent": "file:../kirari-agent"` 平级引用。构建产物是 CommonJS（`dist/index.js`），核心版直接 `require`，桌面版由 vite 打包消费。
+两端按**发版标签**引用：`"kirari-agent": "https://codeload.github.com/Aiikisaraki/kirari-agent/tar.gz/refs/tags/v0.5.0"`。
+构建产物是 CommonJS（`dist/index.js`），核心版直接 `require`，桌面版由 vite 打包消费。
 
-改包源码后必须先 `npm run build` 再验两端，否则 `file:` symlink 下两端读到的仍是旧 `dist`。
+因此**改完本包必须打新 tag 并改两端的引用版本号**，两端才会拿到新代码 —— `npm ci` 装的是那个
+标签的 tarball，不是工作区目录。想在本地联调不走 tag，可临时把两端改成 `file:../kirari-agent`，
+但**不要提交**：那会让 CI 与别人机器上的目录结构成为隐性依赖。
+
+> 注意与 `kirari-net` 的区别：`kirari-net` 是 `file:../kirari-net` 平级引用，改源码立刻生效。
